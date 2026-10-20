@@ -26,3 +26,4 @@ Personal_server/
 
 ## Documentation
 See [`docs/architecture.md`](docs/architecture.md) for full architecture details, endpoint specifications, and database schema.
+
