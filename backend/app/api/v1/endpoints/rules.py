@@ -79,3 +79,4 @@ async def get_unclassified_apps(db: Session = Depends(get_db)):
     sorted by total duration, ready for one-click tagging in the UI.
     """
     return get_unclassified_apps_summary(db)
+
