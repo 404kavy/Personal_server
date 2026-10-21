@@ -31,8 +31,9 @@ If you are exploring the codebase, follow this sequential reading order:
 
 ### 1. `backend/app/core/config.py` (Settings & Constants)
 *The blueprint for the entire backend.*
-- Uses Pydantic (`BaseSettings`) to manage and validate environment variables.
-- Configures server host/port (`127.0.0.1:8000`), local Ollama runtime URL (`http://127.0.0.1:11434`), default database connection (`sqlite:///./personal_server.db` or PostgreSQL), and shared secret tokens for telemetry collectors (`X-Local-Token`).
+- Uses Pydantic (`BaseSettings` & `SettingsConfigDict`) to manage and validate environment variables.
+- Utilizes `@lru_cache` on `get_settings()` so the environment variables and `.env` file are parsed only once into memory, returning the identical cached configuration instance across all requests for optimal performance.
+- Configures server host/port (`127.0.0.1:8000`), local Ollama runtime URL (`http://127.0.0.1:11434`), default database connection (`sqlite:///./personal_server.db` or PostgreSQL), security keys, and shared secret tokens for telemetry collectors (`X-Local-Token`).
 
 ### 2. `backend/app/main.py` (FastAPI Engine & Routes)
 *The core HTTP server.*
@@ -49,6 +50,68 @@ If you are exploring the codebase, follow this sequential reading order:
 ### 4. `backend/.env.example` (Configuration Overrides)
 *Customization template.*
 - Illustrates how to override database URLs, change default Ollama models, or update security tokens without altering source code.
+
+---
+
+## AI Assistant Deterministic Tools (`backend/app/tools/`)
+
+To prevent the local LLM from hallucinating numbers or calculating durations incorrectly from thousands of raw log events, the LLM is given **strictly typed Python tools** rather than direct SQL database access. 
+
+When you ask a question like *"How much time did I study yesterday?"*, the LLM selects the matching tool, FastAPI calculates the exact duration deterministically from the database, and the LLM formats the results into conversational English.
+
+```python
+# ==============================================================================
+# IMPORTANT ANALYTICAL TOOL FUNCTIONS GIVEN TO OLLAMA
+# ==============================================================================
+
+def get_daily_summary(target_date: str) -> dict:
+    """
+    Retrieves the complete aggregate breakdown for a given day (YYYY-MM-DD).
+    - Calculates total study duration, total gaming duration, and total distraction time.
+    - Returns exact seconds, formatted hours/minutes, and top applications used.
+    """
+    pass
+
+def get_study_duration(start_date: str, end_date: str) -> dict:
+    """
+    Queries study and productive coding sessions between two dates.
+    - Filters events belonging to IDEs (e.g., Code.exe, Neovim) and educational domains.
+    - Aggregates total focused work time without double-counting idle periods.
+    """
+    pass
+
+def get_gaming_duration(start_date: str, end_date: str) -> dict:
+    """
+    Queries gaming activity duration between two dates.
+    - Filters processes launched from Steam, Epic Games, or recognized DirectX/Vulkan game executables.
+    - Computes continuous play sessions and peak active hours.
+    """
+    pass
+
+def get_distraction_breakdown(target_date: str, limit: int = 5) -> list[dict]:
+    """
+    Identifies non-productive time sinks for a specific date.
+    - Analyzes browser domain logs (e.g., YouTube, Reddit, Twitter/X) and social desktop apps.
+    - Returns a ranked list of top distractions with individual durations and visit counts.
+    """
+    pass
+
+def compare_activity_periods(period_a_start: str, period_a_end: str, period_b_start: str, period_b_end: str) -> dict:
+    """
+    Performs comparative trend analysis between two distinct timeframes (e.g., this week vs last week).
+    - Computes percentage change in study vs gaming ratio.
+    - Provides delta metrics (+/- hours) used by the LLM to generate actionable recommendations.
+    """
+    pass
+
+def get_music_history(target_date: str) -> dict:
+    """
+    Retrieves recorded Spotify playback history for a target date.
+    - Summarizes top tracks, artists, and total listening duration.
+    - Allows the AI assistant to correlate background music genre with study focus blocks.
+    """
+    pass
+```
 
 ---
 
