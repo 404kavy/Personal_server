@@ -18,3 +18,4 @@ async def verify_local_token(x_local_token: Optional[str] = Header(None)) -> str
             detail="Invalid or missing X-Local-Token authentication header",
         )
     return x_local_token
+

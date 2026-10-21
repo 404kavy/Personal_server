@@ -93,3 +93,4 @@ async def get_sessions(
     if active_only:
         query = query.filter(ActivitySession.is_active == True)
     return query.limit(limit).all()
+

@@ -55,3 +55,20 @@ class DailySummary(Base):
     def __repr__(self) -> str:
         return f"<DailySummary date={self.date} study={self.total_study_seconds}s gaming={self.total_gaming_seconds}s>"
 
+
+class CategoryRule(Base):
+    """User-defined classification rule for an application or domain."""
+    __tablename__ = "category_rules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pattern = Column(String(255), unique=True, index=True, nullable=False)  # e.g., "blender.exe", "figma.com"
+    category = Column(String(50), nullable=False)  # "study", "gaming", "entertainment", "neutral", etc.
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    def __repr__(self) -> str:
+        return f"<CategoryRule pattern='{self.pattern}' -> category='{self.category}'>"
+

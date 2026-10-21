@@ -15,6 +15,7 @@ class ActivityCategory(str, Enum):
     GAMING = "gaming"
     ENTERTAINMENT = "entertainment"
     NEUTRAL = "neutral"
+    UNCLASSIFIED = "unclassified"
 
 
 class EventIngestRequest(BaseModel):
@@ -32,7 +33,7 @@ class EventIngestResponse(BaseModel):
     event_id: int
     timestamp: datetime
     session_id: Optional[int] = None
-    session_category: Optional[ActivityCategory] = None
+    session_category: Optional[str] = None
 
 
 class ActivityEventResponse(BaseModel):
@@ -74,3 +75,31 @@ class DailySummaryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# --- User-Defined Classification Rules & Unclassified App Inbox ---
+
+class CategoryRuleCreate(BaseModel):
+    """Payload for creating or updating a user-defined classification rule."""
+    pattern: str = Field(..., min_length=1, max_length=255, description="Process name or domain (e.g. 'blender.exe', 'reddit.com')")
+    category: str = Field(..., min_length=1, max_length=50, description="Target category: study, gaming, entertainment, neutral, or custom")
+    apply_to_past: bool = Field(True, description="Whether to retroactively update past sessions with this identifier")
+
+
+class CategoryRuleResponse(BaseModel):
+    """Serialized user category rule."""
+    id: int
+    pattern: str
+    category: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UnclassifiedAppResponse(BaseModel):
+    """An app or website that has been recorded but does not yet have a user rule."""
+    identifier: str
+    total_duration_seconds: int
+    session_count: int
+    sample_window_title: Optional[str] = None
