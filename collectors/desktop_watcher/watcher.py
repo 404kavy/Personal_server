@@ -151,3 +151,4 @@ class DesktopWatcher:
 if __name__ == "__main__":
     watcher = DesktopWatcher()
     watcher.run()
+

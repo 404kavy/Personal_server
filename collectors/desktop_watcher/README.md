@@ -25,3 +25,4 @@ python collectors/desktop_watcher/watcher.py
 - `LOCAL_AUTH_TOKEN`: Security token matching `backend/.env`.
 - `HEARTBEAT_INTERVAL_SECONDS`: Default is `5` seconds.
 - `IDLE_THRESHOLD_SECONDS`: Default is `120` seconds (2 minutes).
+
