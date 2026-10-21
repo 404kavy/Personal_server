@@ -4,6 +4,7 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.api import api_router
 from app.core.config import settings
 from app.db.session import Base, engine
 import app.models  # Ensures all models are registered on Base.metadata
@@ -51,6 +52,10 @@ app.add_middleware(
 """ it also allows requests from any Chrome extension by using a regular expression to match the origin."""
 """ the middleware is configured to allow credentials, all HTTP methods, and all headers, enabling flexible communication between the frontend and backend of the application."""
 #do this is basically for website telementtry and analytics, to allow the frontend to communicate with the backend without being blocked by the browser's same-origin policy.
+
+
+# Mount API v1 Routers (Telemetry events, analytics, assistant)
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["General"])
