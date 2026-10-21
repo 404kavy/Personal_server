@@ -35,6 +35,48 @@ If you are exploring the codebase, follow this sequential reading order:
 - Utilizes `@lru_cache` on `get_settings()` so the environment variables and `.env` file are parsed only once into memory, returning the identical cached configuration instance across all requests for optimal performance.
 - Configures server host/port (`127.0.0.1:8000`), local Ollama runtime URL (`http://127.0.0.1:11434`), default database connection (`sqlite:///./personal_server.db` or PostgreSQL), security keys, and shared secret tokens for telemetry collectors (`X-Local-Token`).
 
+#### Configuration Template Format:
+If you want to customize your own settings, this is the exact pattern used:
+
+```python
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    # Application
+    app_name: str = "My FastAPI App"
+    app_version: str = "1.0.0"
+    debug: bool = False
+
+    # API
+    api_v1_prefix: str = "/api/v1"
+
+    # Database
+    database_url: str = "sqlite:///./personal_server.db"
+
+    # Security
+    secret_key: str = "dev-secret-key-change-in-env"
+    access_token_expire_minutes: int = 30
+
+    # Environment configuration (.env file support)
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Cached settings singleton: loaded once, reused across requests."""
+    return Settings()
+
+
+settings = get_settings()
+```
+
 ### 2. `backend/app/main.py` (FastAPI Engine & Routes)
 *The core HTTP server.*
 - Sets up modern FastAPI lifespan events for clean startup and shutdown.
