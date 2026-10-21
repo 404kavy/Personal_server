@@ -5,11 +5,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.db.session import Base, engine
+import app.models  # Ensures all models are registered on Base.metadata
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: could initialize database tables or verify connections
+    # Startup: initialize database tables and connections
+    Base.metadata.create_all(bind=engine)
     print(f"[{datetime.now(timezone.utc).isoformat()}] Starting {settings.PROJECT_NAME} v{settings.VERSION}")
     yield
     # Shutdown cleanup
@@ -77,7 +80,7 @@ async def check_assistant_status():
     """Check connectivity to the local Ollama instance and query available models."""
     ollama_url = f"{settings.OLLAMA_BASE_URL}/api/tags"
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=3.0) as client: #httpx.AsyncClient is an asynchronous HTTP client provided by the httpx library. It allows you to make HTTP requests in an asynchronous manner, which is useful for non-blocking I/O operations in applications that require high concurrency or responsiveness.
             resp = await client.get(ollama_url)
             if resp.status_code == 200:
                 data = resp.json()
