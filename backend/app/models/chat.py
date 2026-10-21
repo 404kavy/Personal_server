@@ -59,3 +59,4 @@ class ChatMessage(Base):
     def __repr__(self) -> str:
         return f"<ChatMessage id={self.id} role='{self.role}' conversation_id={self.conversation_id}>"
 
+    
