@@ -1,7 +1,7 @@
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict #this is the new way to import SettingsConfigDict in pydantic v2 it function is to configure the settings model, including specifying the environment file and how to handle extra fields.
 #for example, in this code snippet, the SettingsConfigDict is used to specify that the environment variables should be loaded from a .env file with UTF-8 encoding, and that any extra fields in the environment variables should be ignored. This allows for flexible configuration of the application settings while ensuring that only the relevant fields are used.
-
+#function of base setting is 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Personal Activity Server & Assistant"

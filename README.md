@@ -84,6 +84,66 @@ settings = get_settings()
 - Defines status and health routes (`/`, `/health`).
 - Includes an async status check for Ollama (`/api/v1/assistant/status`) that queries local models via HTTP.
 
+#### Application Template Format:
+If you want to customize your `main.py` entry point, this is the standard pattern used:
+
+```python
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+import httpx
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import settings
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager: handles startup and shutdown logic."""
+    print(f"Starting {settings.PROJECT_NAME} v{settings.VERSION}")
+    yield
+    print(f"Shutting down {settings.PROJECT_NAME}")
+
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="Local-first Personal Activity Tracker and Ollama AI Assistant Engine",
+    lifespan=lifespan,
+)
+
+# CORS configuration: Localhost and Chrome Extension origin support
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^chrome-extension://.*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/", tags=["General"])
+async def root():
+    """Root status endpoint."""
+    return {
+        "name": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "status": "online",
+        "docs_url": "/docs",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/health", tags=["General"])
+async def health():
+    """Health check endpoint."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+```
+
 ### 3. `run.py` (Server Entry-Point)
 *The single-command launcher.*
 - Resolves paths so `backend/` is on the Python module path (`sys.path`).
